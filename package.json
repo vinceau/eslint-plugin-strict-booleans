@@ -2,7 +2,7 @@
   "name": "eslint-plugin-strict-booleans",
   "description": "No nullable numbers as booleans",
   "license": "MIT",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "repository": "vinceau/eslint-plugin-strict-booleans",
   "engines": {
     "node": ">=10"
