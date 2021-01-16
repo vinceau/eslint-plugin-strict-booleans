@@ -7,7 +7,7 @@ import { RuleContext, RuleListener, RuleModule } from "@typescript-eslint/experi
 
 export type Options = [{}];
 
-export type MessageId = "conditionErrorNullableNumber";
+export type MessageId = "conditionErrorNullableNumber" | "noStrictNullCheck";
 
 const noNullableNumbers: RuleModule<MessageId, Options> = {
   meta: {
@@ -15,6 +15,8 @@ const noNullableNumbers: RuleModule<MessageId, Options> = {
     messages: {
       conditionErrorNullableNumber:
         "Unexpected nullable number value in conditional. " + "Please handle the nullish/zero/NaN cases explicitly.",
+      noStrictNullCheck:
+        "This rule requires the `strictNullChecks` compiler option to be turned on to function correctly.",
     },
     schema: [
       {
@@ -25,6 +27,18 @@ const noNullableNumbers: RuleModule<MessageId, Options> = {
   create(context: Readonly<RuleContext<MessageId, Options>>) {
     const service = ESLintUtils.getParserServices(context);
     const checker = service.program.getTypeChecker();
+    const compilerOptions = service.program.getCompilerOptions();
+    const isStrictNullChecks = tsutils.isStrictCompilerOptionEnabled(compilerOptions, "strictNullChecks");
+
+    if (!isStrictNullChecks) {
+      context.report({
+        loc: {
+          start: { line: 0, column: 0 },
+          end: { line: 0, column: 0 },
+        },
+        messageId: "noStrictNullCheck",
+      });
+    }
 
     const checkedNodes = new Set<TSESTree.Node>();
 
