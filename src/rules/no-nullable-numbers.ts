@@ -3,107 +3,28 @@ import { TSESTree, AST_NODE_TYPES, ESLintUtils } from "@typescript-eslint/experi
 import * as ts from "typescript";
 import * as tsutils from "tsutils";
 import * as util from "../util";
+import { RuleContext, RuleListener, RuleModule } from "@typescript-eslint/experimental-utils/dist/ts-eslint";
 
-export type Options = [
-  {
-    allowString?: boolean;
-    allowNumber?: boolean;
-    allowNullableObject?: boolean;
-    allowNullableBoolean?: boolean;
-    allowNullableString?: boolean;
-    allowNullableNumber?: boolean;
-    allowAny?: boolean;
-    allowRuleToRunWithoutStrictNullChecksIKnowWhatIAmDoing?: boolean;
-  },
-];
+export type Options = [{}];
 
-export type MessageId =
-  | "conditionErrorOther"
-  | "conditionErrorAny"
-  | "conditionErrorNullish"
-  | "conditionErrorNullableBoolean"
-  | "conditionErrorString"
-  | "conditionErrorNullableString"
-  | "conditionErrorNumber"
-  | "conditionErrorNullableNumber"
-  | "conditionErrorObject"
-  | "conditionErrorNullableObject"
-  | "noStrictNullCheck";
+export type MessageId = "conditionErrorNullableNumber";
 
-export default util.createRule<Options, MessageId>({
-  name: "strict-boolean-expressions",
+const noNullableNumbers: RuleModule<MessageId, Options> = {
   meta: {
     type: "suggestion",
-    docs: {
-      description: "Restricts the types allowed in boolean expressions",
-      category: "Best Practices",
-      recommended: false,
-      requiresTypeChecking: true,
+    messages: {
+      conditionErrorNullableNumber:
+        "Unexpected nullable number value in conditional. " + "Please handle the nullish/zero/NaN cases explicitly.",
     },
     schema: [
       {
         type: "object",
-        properties: {
-          allowString: { type: "boolean" },
-          allowNumber: { type: "boolean" },
-          allowNullableObject: { type: "boolean" },
-          allowNullableBoolean: { type: "boolean" },
-          allowNullableString: { type: "boolean" },
-          allowNullableNumber: { type: "boolean" },
-          allowAny: { type: "boolean" },
-          allowRuleToRunWithoutStrictNullChecksIKnowWhatIAmDoing: {
-            type: "boolean",
-          },
-        },
-        additionalProperties: false,
       },
     ],
-    messages: {
-      conditionErrorOther: "Unexpected value in conditional. " + "A boolean expression is required.",
-      conditionErrorAny: "Unexpected any value in conditional. " + "An explicit comparison or type cast is required.",
-      conditionErrorNullish: "Unexpected nullish value in conditional. " + "The condition is always false.",
-      conditionErrorNullableBoolean:
-        "Unexpected nullable boolean value in conditional. " + "Please handle the nullish case explicitly.",
-      conditionErrorString: "Unexpected string value in conditional. " + "An explicit empty string check is required.",
-      conditionErrorNullableString:
-        "Unexpected nullable string value in conditional. " + "Please handle the nullish/empty cases explicitly.",
-      conditionErrorNumber: "Unexpected number value in conditional. " + "An explicit zero/NaN check is required.",
-      conditionErrorNullableNumber:
-        "Unexpected nullable number value in conditional. " + "Please handle the nullish/zero/NaN cases explicitly.",
-      conditionErrorObject: "Unexpected object value in conditional. " + "The condition is always true.",
-      conditionErrorNullableObject:
-        "Unexpected nullable object value in conditional. " + "An explicit null check is required.",
-      noStrictNullCheck:
-        "This rule requires the `strictNullChecks` compiler option to be turned on to function correctly.",
-    },
   },
-  defaultOptions: [
-    {
-      allowString: true,
-      allowNumber: true,
-      allowNullableObject: true,
-      allowNullableBoolean: false,
-      allowNullableString: false,
-      allowNullableNumber: false,
-      allowAny: false,
-      allowRuleToRunWithoutStrictNullChecksIKnowWhatIAmDoing: false,
-    },
-  ],
-  create(context, [options]) {
+  create(context: Readonly<RuleContext<MessageId, Options>>) {
     const service = ESLintUtils.getParserServices(context);
     const checker = service.program.getTypeChecker();
-    const compilerOptions = service.program.getCompilerOptions();
-    const isStrictNullChecks = tsutils.isStrictCompilerOptionEnabled(compilerOptions, "strictNullChecks");
-
-    if (!isStrictNullChecks && options.allowRuleToRunWithoutStrictNullChecksIKnowWhatIAmDoing !== true) {
-      context.report({
-        loc: {
-          start: { line: 0, column: 0 },
-          end: { line: 0, column: 0 },
-        },
-        messageId: "noStrictNullCheck",
-      });
-    }
 
     const checkedNodes = new Set<TSESTree.Node>();
 
@@ -115,7 +36,7 @@ export default util.createRule<Options, MessageId>({
       WhileStatement: checkTestExpression,
       'LogicalExpression[operator!="??"]': checkNode,
       'UnaryExpression[operator="!"]': checkUnaryLogicalExpression,
-    };
+    } as RuleListener;
 
     type TestExpression =
       | TSESTree.ConditionalExpression
@@ -182,75 +103,73 @@ export default util.createRule<Options, MessageId>({
       // nullish
       if (is("nullish")) {
         // condition is always false
-        context.report({ node, messageId: "conditionErrorNullish" });
+        // context.report({ node, messageId: "conditionErrorNullish" });
         return;
       }
 
       // nullable boolean
       if (is("nullish", "boolean")) {
-        if (!options.allowNullableBoolean) {
-          context.report({ node, messageId: "conditionErrorNullableBoolean" });
-        }
+        // if (!options.allowNullableBoolean) {
+        //   context.report({ node, messageId: "conditionErrorNullableBoolean" });
+        // }
         return;
       }
 
       // string
       if (is("string")) {
-        if (!options.allowString) {
-          context.report({ node, messageId: "conditionErrorString" });
-        }
+        // if (!options.allowString) {
+        //   context.report({ node, messageId: "conditionErrorString" });
+        // }
         return;
       }
 
       // nullable string
       if (is("nullish", "string")) {
-        if (!options.allowNullableString) {
-          context.report({ node, messageId: "conditionErrorNullableString" });
-        }
+        // if (!options.allowNullableString) {
+        //   context.report({ node, messageId: "conditionErrorNullableString" });
+        // }
         return;
       }
 
       // number
       if (is("number")) {
-        if (!options.allowNumber) {
-          context.report({ node, messageId: "conditionErrorNumber" });
-        }
+        // if (!options.allowNumber) {
+        //   context.report({ node, messageId: "conditionErrorNumber" });
+        // }
         return;
       }
 
       // nullable number
       if (is("nullish", "number")) {
-        if (!options.allowNullableNumber) {
-          context.report({ node, messageId: "conditionErrorNullableNumber" });
-        }
+        context.report({ node, messageId: "conditionErrorNullableNumber" });
         return;
       }
 
       // object
       if (is("object")) {
         // condition is always true
-        context.report({ node, messageId: "conditionErrorObject" });
+        // context.report({ node, messageId: "conditionErrorObject" });
         return;
       }
 
       // nullable object
       if (is("nullish", "object")) {
-        if (!options.allowNullableObject) {
-          context.report({ node, messageId: "conditionErrorNullableObject" });
-        }
+        // if (!options.allowNullableObject) {
+        //   context.report({ node, messageId: "conditionErrorNullableObject" });
+        // }
         return;
       }
 
       // any
       if (is("any")) {
-        if (!options.allowAny) {
-          context.report({ node, messageId: "conditionErrorAny" });
-        }
+        // if (!options.allowAny) {
+        //   context.report({ node, messageId: "conditionErrorAny" });
+        // }
         return;
       }
 
       // other
-      context.report({ node, messageId: "conditionErrorOther" });
+      // context.report({ node, messageId: "conditionErrorOther" });
     }
 
     /** The types we care about */
@@ -314,4 +233,6 @@ export default util.createRule<Options, MessageId>({
       return variantTypes;
     }
   },
-});
+};
+
+export default noNullableNumbers;
