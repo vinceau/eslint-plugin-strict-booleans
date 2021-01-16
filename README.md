@@ -1,1 +1,1 @@
-# `no-nullable-numbers`
+# `strict-booleans`

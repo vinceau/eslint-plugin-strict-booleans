@@ -1,9 +1,9 @@
 {
-  "name": "no-nullable-numbers",
-  "description": "no nullable numbers as booleans",
+  "name": "eslint-plugin-strict-booleans",
+  "description": "No nullable numbers as booleans",
   "license": "MIT",
   "version": "0.0.0",
-  "repository": "vinceau/no-nullable-numbers",
+  "repository": "vinceau/eslint-plugin-strict-booleans",
   "engines": {
     "node": ">=10"
   },
