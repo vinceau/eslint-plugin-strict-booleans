@@ -1,1 +1,1 @@
-# `no-nullable-number`
+# `no-nullable-numbers`

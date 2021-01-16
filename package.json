@@ -1,9 +1,9 @@
 {
-  "name": "no-nullable-number",
+  "name": "no-nullable-numbers",
   "description": "no nullable numbers as booleans",
   "license": "MIT",
   "version": "0.0.0",
-  "repository": "vinceau/no-nullable-number",
+  "repository": "vinceau/no-nullable-numbers",
   "engines": {
     "node": ">=10"
   },
