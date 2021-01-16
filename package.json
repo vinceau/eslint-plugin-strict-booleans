@@ -30,13 +30,11 @@
   },
   "dependencies": {
     "@typescript-eslint/experimental-utils": "4.13.0",
-    "debug": "^4.1.1",
     "tsutils": "^3.17.1"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^17.0.0",
     "@rollup/plugin-node-resolve": "^8.0.0",
-    "@types/debug": "*",
     "@types/jest": "^25.1.4",
     "@types/lodash": "^4.14.138",
     "@types/node": "^12.7.3",
